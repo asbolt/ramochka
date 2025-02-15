@@ -1,30 +1,53 @@
 .model tiny
 .code
+.186
 org 100h
 
-Start:  mov ax, 0de41h              ; 'A' bright green omn magenta blinking
-        call DrawChar
+Start:  mov ah, 11100010b
+        mov si, offset String
+        mov cx, 5h
+        mov di, 0b800h
+        mov es, di
+        mov di, 5 * 80*2 + 40*2
+        call DrawLine
 
         mov ax, 4c00h
         int 21h
 
-;------------------------------------------------
-; Draw a char in video mem
-; Entry: AL = char to write
-;         AH = color attr
-; Exit: None
-; Destr: BX, ES
-;------------------------------------------------
-DrawChar    proc
+String: db '101$'
 
-            mov bx, 0b800h
-            mov es, bx
-            mov bx, 0h
-            mov es:[bx], ax
+;------------------------------------------------
+; Draw a line in video meme
+; Entry:    AH    - color attr
+;           DS:SI - addr of 3-byte ASCII seg to draw a frame
+;           CX    - line length
+;           ES:DI - line beginning addr
+; Exit:     None
+; Destr:    AL CX SI DI
+;------------------------------------------------
+DrawLine    proc
+
+            mov al, ds:[si]
+            inc si
+
+            mov es:[di], ax
+            add di, 2
+
+            mov al, ds:[si]
+            inc si
+
+Next:       mov es:[di], ax
+            add di, 2
+            loop Next
+
+            mov al, ds:[si]
+            inc si
+
+            mov es:[di], ax
+            add di, 2
 
             ret
             endp
-;------------------------------------------------
 
 end Start
 
