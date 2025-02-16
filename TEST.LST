@@ -1,0 +1,99 @@
+Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 1
+test.asm
+
+
+
+      1	0000			     .model tiny
+      2	0000			     .code
+      3				     .186
+      4				     org 100h
+      5
+      6	0100  B4 E2		     Start:  mov ah, 11100010b
+      7	0102  BF 0110r			     mov di, offset String
+      8	0105  BE 0110r			     mov si, offset String
+      9	0108  E8 000C			     call DrawStr
+     10
+     11	010B  B8 4C00			     mov ax, 4c00h
+     12	010E  CD 21			     int 21h
+     13
+     14	0110  68 32 33 34 35 37	24   String: db	'h23457$'
+     15
+     16				     ;------------------------------------------------
+     17				     ; Draw a string in	video mem
+     18				     ; Entry:	 AH    - color attr
+     19				     ;		 DS:SI - addr of string
+     20				     ;		 ES:DI - line beginning	addr
+     21				     ; Exit:	 None
+     22				     ; Destr:
+     23				     ;------------------------------------------------
+     24	0117			     DrawStr	 proc
+     25
+     26	0117  8B FE				 mov di, si
+     27	0119  B0 24				 mov al, 24h
+     28	011B  33 C9				 xor cx, cx
+     29	011D  49				 dec cx
+     30	011E  F2> AE				 repne scasb
+     31	0120  F7 D9				 neg cx
+     32	0122  83 E9 02				 sub cx, 2
+     33
+     34	0125  BF B800				 mov di, 0b800h
+     35	0128  8E C7				 mov es, di
+     36	012A  BF 0050				 mov di, 80
+     37	012D  2B F9				 sub di, cx
+     38	012F  81 C7 0C80			 add di, 80*2 *20
+     39
+     40	0133  50				 push ax
+     41	0134  8B C7				 mov ax, di
+     42	0136  BF 0002				 mov di, 2
+     43						 sum ax, ax
+**Error** test.asm(43) Illegal instruction
+     44
+     45	0139  AC		     Miu:	 lodsb
+     46	013A  AB				 stosw
+     47	013B  E2 FC				 loop Miu
+     48
+     49	013D  C3				 ret
+     50	013E					 endp
+     51
+     52				     end Start
+Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 2
+Symbol Table
+
+
+
+
+Symbol Name			  Type	 Value
+
+??DATE				  Text	 "02/16/25"
+??FILENAME			  Text	 "test	  "
+??TIME				  Text	 "19:58:12"
+??VERSION			  Number 040A
+@32BIT				  Text	 0
+@CODE				  Text	 DGROUP
+@CODESIZE			  Text	 0
+@CPU				  Text	 0103H
+@CURSEG				  Text	 _TEXT
+@DATA				  Text	 DGROUP
+@DATASIZE			  Text	 0
+@FILENAME			  Text	 TEST
+@INTERFACE			  Text	 000H
+@MODEL				  Text	 1
+@STACK				  Text	 DGROUP
+@WORDSIZE			  Text	 2
+DRAWSTR				  Near	 DGROUP:0117
+MIU				  Near	 DGROUP:0139
+START				  Near	 DGROUP:0100
+STRING				  Near	 DGROUP:0110
+
+Groups & Segments		  Bit Size Align  Combine Class
+
+DGROUP				  Group
+  _DATA				  16  0000 Word	  Public  DATA
+  _TEXT				  16  013E Word	  Public  CODE
+Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 3
+Error Summary
+
+
+
+**Error** test.asm(43) Illegal instruction
+
