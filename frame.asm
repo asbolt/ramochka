@@ -5,10 +5,15 @@ org 100h
 
 Start:          call    GetArguments
 
-                cmp     dx, 0h          ;--| if style != 0, get style from FrameStyles
-                je      StartDraw       ;  | if style == 0, skip this part
+                cmp     dx, 0h          ; --| if style != 0, get style in next block ---|
+                je      StartDraw       ; --| if style == 0, skip this part             |
+                                        ;                                               |
+                cmp     dx, 1h          ; --| <-----------------------------------------|
+                je      GetStyle1       ;   | 
 
-                                        ; \\TODO mov     si, offset FrameStyles 
+GetStyle1:      mov     si, offset FrameStyle1
+                jmp     StartDraw
+
 
 StartDraw:      push di
                 call    DrawFrame
@@ -23,7 +28,7 @@ StartDraw:      push di
                 mov     ax, 4c00h
                 int     21h
 
-
+FrameStyle1: db 3h, 3h, 3h, 3h, 20h, 3h, 3h, 3h, 3h, '$' 
 
 ;------------------------------------------------
 ; Get decimal number from command line arguments
