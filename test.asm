@@ -4,8 +4,8 @@
 org 100h
 
 Start:  mov ah, 11100010b
-        mov di, offset String
-        mov si, offset String
+        mov di, 81h
+        mov si, 81h
         call DrawStr
 
         mov ax, 4c00h
@@ -40,7 +40,7 @@ DrawStr     proc
             push ax
             mov ax, di
             mov di, 2
-            sum ax, ax
+            mul di
 
 Miu:        lodsb
             stosw

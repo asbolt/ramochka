@@ -1,4 +1,4 @@
-Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 1
+Turbo Assembler	 Version 4.1	    02/16/25 23:55:17	    Page 1
 test.asm
 
 
@@ -9,8 +9,8 @@ test.asm
       4				     org 100h
       5
       6	0100  B4 E2		     Start:  mov ah, 11100010b
-      7	0102  BF 0110r			     mov di, offset String
-      8	0105  BE 0110r			     mov si, offset String
+      7	0102  BF 0081			     mov di, 81h
+      8	0105  BE 0081			     mov si, 81h
       9	0108  E8 000C			     call DrawStr
      10
      11	010B  B8 4C00			     mov ax, 4c00h
@@ -45,18 +45,17 @@ test.asm
      40	0133  50				 push ax
      41	0134  8B C7				 mov ax, di
      42	0136  BF 0002				 mov di, 2
-     43						 sum ax, ax
-**Error** test.asm(43) Illegal instruction
+     43	0139  F7 E7				 mul di
      44
-     45	0139  AC		     Miu:	 lodsb
-     46	013A  AB				 stosw
-     47	013B  E2 FC				 loop Miu
+     45	013B  AC		     Miu:	 lodsb
+     46	013C  AB				 stosw
+     47	013D  E2 FC				 loop Miu
      48
-     49	013D  C3				 ret
-     50	013E					 endp
+     49	013F  C3				 ret
+     50	0140					 endp
      51
      52				     end Start
-Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 2
+Turbo Assembler	 Version 4.1	    02/16/25 23:55:17	    Page 2
 Symbol Table
 
 
@@ -66,7 +65,7 @@ Symbol Name			  Type	 Value
 
 ??DATE				  Text	 "02/16/25"
 ??FILENAME			  Text	 "test	  "
-??TIME				  Text	 "19:58:12"
+??TIME				  Text	 "23:55:17"
 ??VERSION			  Number 040A
 @32BIT				  Text	 0
 @CODE				  Text	 DGROUP
@@ -81,7 +80,7 @@ Symbol Name			  Type	 Value
 @STACK				  Text	 DGROUP
 @WORDSIZE			  Text	 2
 DRAWSTR				  Near	 DGROUP:0117
-MIU				  Near	 DGROUP:0139
+MIU				  Near	 DGROUP:013B
 START				  Near	 DGROUP:0100
 STRING				  Near	 DGROUP:0110
 
@@ -89,11 +88,5 @@ Groups & Segments		  Bit Size Align  Combine Class
 
 DGROUP				  Group
   _DATA				  16  0000 Word	  Public  DATA
-  _TEXT				  16  013E Word	  Public  CODE
-Turbo Assembler	 Version 4.1	    02/16/25 19:58:13	    Page 3
-Error Summary
-
-
-
-**Error** test.asm(43) Illegal instruction
+  _TEXT				  16  0140 Word	  Public  CODE
 
