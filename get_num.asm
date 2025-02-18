@@ -3,10 +3,20 @@
 .186
 org 100h
 
-Start:  call    GetArguments
+Start:      call    GetArguments
 
-        mov ax, 4c00h
-        int 21h
+            cmp     dx, 0h                  ;--| if style != 0, get style from FrameStyles
+            je      StartDraw               ;  | if style == 0, skip this part
+            mov     si, offset FrameStyles  ;--|
+
+            mov     dx, di                  ; ds:dx - addr of the line to be output
+
+StartDraw:  call    DrawFrame
+
+            mov     ax, 4c00h
+            int     21h
+
+FrameStyles: db '03 03 03 03 20 03 03 03 03$'
 
 
 
@@ -90,9 +100,9 @@ SecondDig:      sub     al, 30h         ; sub for digit and alpha
 ;           BP      - hight
 ;           AH      - color
 ;           DX (DL) - style
-;           DS:SI   - addr of the line to be output
-;           DS:DI   - addr of frame style (if style = 0)
-; Destr:    AL
+;           DS:DI   - addr of the line to be output
+;           DS:SI   - addr of frame style (if style = 0)
+; Destr:    AL BX
 ;------------------------------------------------
 GetArguments    proc
                 
@@ -114,10 +124,113 @@ GetArguments    proc
                 mov di, si
                 cmp     dl, 0h          ; --| if style == 0, new_di = old_di + 10 (9 byte for frame style and skip space symbol)
                 jne     EndGetArg       ;   | if style != 0, new_di = old_di
-                add     si, 0ah         ; --| new_di - address of the line to be output
+                add     di, 0ah         ; --| new_di - address of the line to be output
 
 EndGetArg:      ret
                 endp
+
+
+
+;------------------------------------------------
+; Draw a line in video meme
+; Entry:    AH    - color attr
+;           DS:SI - addr of 3-byte ASCII seg to draw a frame
+;           CX    - line length
+;           ES:DI - line beginning addr
+;           DF = 0
+; Exit:     None
+; Destr:    AL SI DI
+;------------------------------------------------
+DrawLine        proc
+
+                push cx
+
+                lodsb
+                stosw
+                lodsb
+                rep stosw
+                lodsb
+                stosw
+
+                pop cx
+
+                ret
+                endp
+
+
+
+;------------------------------------------------
+; Draw a frame in video mem
+; Entry:    CX      - length
+;           BP      - hight
+;           AH      - color
+;           ES:DI   - line beginning addr
+;           DS:SI   - addr of 9-byte ASCII seg to draw a frame
+; Exit:     None
+; Destr:    AL CX SI DI BX
+;------------------------------------------------
+DrawFrame       proc
+
+                call PutLBF         ; put into ES:DI line beginning addr of frame
+
+                push di             ; save di to go to new line after DrawLine
+                call DrawLine
+                pop di
+                add di, 80*2        ; go to new line
+
+                push bp
+
+NextLine:       push di             ; save di to go to new line after DrawLine
+                call DrawLine
+                pop di
+                add di, 80*2        ; go to new line
+                sub si, 3h          ; go back to 3 byte in seg with frame style, because we need to print equal line then
+                dec bp              ; decrement remaining lines counter
+                cmp bp, 0h          ; if remaining lines counter != 0, print another line
+                jne NextLine
+
+                pop bp
+
+                add si, 3h          ; add 3 byte in seg with frame style, because in cycle took away the excess in the last pass
+                push di             ; save di to go to new line after DrawLine
+                call DrawLine
+                pop di
+                add di, 80*2        ; go to new line
+
+                ret
+                endp
+
+
+
+
+;------------------------------------------------
+; Put into ES:DI line beginning addr of frame
+; Entry:    CX      - length 
+;           BP      - hight
+; Exit:     ES:DI   - line beginning addr
+; Destr:    AX
+;------------------------------------------------
+PutLBF      proc
+
+            push    ax              ; save ax
+            mov     bx, 2           ; value for mul and div
+
+            mov     di, 0b800h      ; --| go into video mem
+            mov     es, di          ; --|
+         
+            mov     ax, 80          ; --| calculate how many columns need to be indented
+            sub     ax, cx          ;   |
+            sub     ax, 2           ;   |
+            div     bx              ;   |
+            mul     bx              ; --|
+            mov     di, ax
+
+            add     di, 5 * 80*2    ; add 5 lines
+
+            pop     ax              ; restore ax
+
+            ret
+            endp
 
 
 
